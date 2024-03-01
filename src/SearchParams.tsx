@@ -1,10 +1,17 @@
-import { useState, useContext } from "react";
+import {
+  useState,
+  useContext,
+  useMemo,
+  useDeferredValue,
+  useTransition,
+} from "react";
 import useBreedList from "./hooks/useBreedList";
 import Results from "./Results";
 import fetchSearch from "./fetchSearch";
 import { useQuery } from "@tanstack/react-query";
 import AdoptedPetContext from "./AdoptedPetContext";
-const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
+import { Animal } from "./APIResponsesTypes";
+const ANIMALS:Animal[] = ["bird", "cat", "dog", "rabbit", "repetile"];
 
 const SearchParams = () => {
   // eslint-disable-next-line no-unused-vars
@@ -13,14 +20,20 @@ const SearchParams = () => {
   //   const [breed, setBreed] = useState("");
   const [requestParam, setRequestParams] = useState({
     location: "",
-    animal: "",
+    animal: "" as Animal,
     breed: "",
   });
-  const [animal, setAnimal] = useState("");
+  const [animal, setAnimal] = useState("" as Animal);
   //   const [pets, setPets] = useState();
   const [breeds] = useBreedList(animal);
   const results = useQuery(["search", requestParam], fetchSearch);
   const pets = results?.data?.pets ?? [];
+  const deferedPets = useDeferredValue(pets);
+  const renderedPets = useMemo(
+    () => <Results pets={deferedPets} />,
+    [deferedPets],
+  );
+  const [isPending, startTransition] = useTransition();
 
   //   useEffect(() => {
   //     requestPets();
@@ -41,14 +54,16 @@ const SearchParams = () => {
         className="mb-10 flex  flex-col items-center justify-center rounded-lg bg-gray-100  p-10 shadow-lg"
         onSubmit={(e) => {
           e.preventDefault();
-          const formData = new FormData(e.target);
+          const formData = new FormData(e.currentTarget);
           const obj = {
-            animal: formData.get("animal") ?? "",
-            breed: formData.get("breed") ?? "",
-            location: formData.get("location") ?? "",
+            animal: formData.get("animal")?.toString() as Animal ?? "" as Animal,
+            breed: formData.get("breed")?.toString() ?? "",
+            location: formData.get("location")?.toString() ?? "",
           };
           console.log(obj);
-          setRequestParams(obj);
+          startTransition(() => {
+            setRequestParams(obj);
+          });
 
           //   requestPets();
         }}
@@ -77,8 +92,11 @@ const SearchParams = () => {
             name="animal"
             className="search-input"
             onChange={(e) => {
-              setAnimal(e.target.value);
+              setAnimal(e.target.value as Animal);
               //   setBreed("");
+            }}
+            onBlur={(e) => {
+              setAnimal(e.target.value as Animal)
             }}
             value={animal}
           >
@@ -105,10 +123,10 @@ const SearchParams = () => {
           </select>
         </label>
         <button className="rounded border-none bg-orange-500 px-6 py-2 text-white hover:opacity-50">
-          Submit
+          {isPending ? "loading..." : "Submit"}
         </button>
       </form>
-      <Results pets={pets} />
+      {renderedPets}
     </div>
   );
 };
