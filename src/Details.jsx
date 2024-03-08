@@ -4,8 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import fetchPet from "./fetchPet";
 import Carousel from "./Carousel";
 import ErrorBoundary from "./ErrorBoundary";
+import {useGetPetQuery} from "./redux/feature/petApiService";
 const Modal = lazy(() => import("./Modal"));
-import AdoptedPetContext from "./AdoptedPetContext";
+// import AdoptedPetContext from "./AdoptedPetContext";
+import { useDispatch } from "react-redux";
+import { adopt } from "./redux/feature/adoptedPetSlice";
+
 const Details = () => {
   const { id } = useParams();
   if (!id) {
@@ -15,22 +19,25 @@ const Details = () => {
   }
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
-  const results = useQuery(["details", id], fetchPet);
+  // const results = useQuery(["details", id], fetchPet);
+  const {data,isLoading} = useGetPetQuery(id)
+  // console.log("pet",pet);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setAdoptedPet] = useContext(AdoptedPetContext);
+  // const [_, setAdoptedPet] = useContext(AdoptedPetContext);
+  const dispatch = useDispatch()
 
-  if (results?.isError) {
-    return <h2>ohoo</h2>;
-  }
+  // if (results?.isError) {
+  //   return <h2>ohoo</h2>;
+  // }
 
-  if (results?.isLoading) {
+  if (isLoading) {
     return (
       <div className="loading-pane">
         <h2 className="loader">🧿</h2>
       </div>
     );
   }
-  const pet = results?.data?.pets?.at(0);
+  const pet = data.pets?.at(0);
   if (!pet) {
     throw new Error("no pet here");
   }
@@ -53,7 +60,8 @@ const Details = () => {
                 <div className="buttons">
                   <button
                     onClick={() => {
-                      setAdoptedPet(pet);
+                      // setAdoptedPet(pet);
+                      dispatch(adopt(pet))
                       navigate("/");
                     }}
                   >

@@ -1,6 +1,6 @@
 import {
   useState,
-  useContext,
+  // useContext,
   useMemo,
   useDeferredValue,
   useTransition,
@@ -9,24 +9,30 @@ import useBreedList from "./hooks/useBreedList";
 import Results from "./Results";
 import fetchSearch from "./fetchSearch";
 import { useQuery } from "@tanstack/react-query";
-import AdoptedPetContext from "./AdoptedPetContext";
+// import AdoptedPetContext from "./AdoptedPetContext";
 import { Animal } from "./APIResponsesTypes";
+import { useSelector } from "react-redux";
+import { all } from "./redux/feature/searchParamsSlice";
+import { useDispatch } from "react-redux";
 const ANIMALS:Animal[] = ["bird", "cat", "dog", "rabbit", "repetile"];
 
 const SearchParams = () => {
   // eslint-disable-next-line no-unused-vars
-  const [adoptedPet, _] = useContext(AdoptedPetContext);
+  // const [adoptedPet, _] = useContext(AdoptedPetContext);
+  const adoptedPet = useSelector((state:any) => state?.adoptedPet?.value)
   //   const [location, setLocation] = useState("");
   //   const [breed, setBreed] = useState("");
-  const [requestParam, setRequestParams] = useState({
-    location: "",
-    animal: "" as Animal,
-    breed: "",
-  });
+  // const [requestParam, setRequestParams] = useState({
+  //   location: "",
+  //   animal: "" as Animal,
+  //   breed: "",
+  // });
+  const requestParam = useSelector((state:any) => state.searchParamsSlice)
+  const dispatch = useDispatch()
   const [animal, setAnimal] = useState("" as Animal);
   //   const [pets, setPets] = useState();
   const [breeds] = useBreedList(animal);
-  const results = useQuery(["search", requestParam], fetchSearch);
+  const results = useQuery(["search", requestParam.value], fetchSearch);
   const pets = results?.data?.pets ?? [];
   const deferedPets = useDeferredValue(pets);
   const renderedPets = useMemo(
@@ -62,7 +68,8 @@ const SearchParams = () => {
           };
           console.log(obj);
           startTransition(() => {
-            setRequestParams(obj);
+            // setRequestParams(obj);
+            dispatch(all(obj))
           });
 
           //   requestPets();

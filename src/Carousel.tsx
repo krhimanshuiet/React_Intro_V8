@@ -56,6 +56,7 @@ class Carousel extends Component<IProps> {
       <div className="flex gap-4">
         <img
           src={images[active]}
+          data-testid="hero"
           alt="animal-hero"
           className="aspect-square h-40 w-20 flex-grow rounded-lg object-contain"
         />
@@ -66,9 +67,10 @@ class Carousel extends Component<IProps> {
               onClick={this.handleIndexClick}
               data-index={index}
               key={photo}
+              data-testid={`thumbnail${index}`}
               src={photo}
               className={
-                index === active ? "rounded-full opacity-50" : "rounded-full"
+                index === active ? "rounded-full active opacity-50" : "rounded-full"
               }
               alt="animal-thumbnail"
             />

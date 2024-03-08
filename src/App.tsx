@@ -1,8 +1,10 @@
 import React, { useState, lazy, Suspense } from "react";
 import { Link, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AdoptedPetContext from "./AdoptedPetContext";
+// import AdoptedPetContext from "./AdoptedPetContext";
 import { Pet } from "./APIResponsesTypes";
+import store from "./redux/store"
+import { Provider } from "react-redux";
 const Details = lazy(() => import("./Details"));
 const SearchParams = lazy(() => import("./SearchParams"));
 
@@ -16,7 +18,6 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const adoptedPet = useState(null as Pet | null);
   return (
     <div
       className="m-0 p-0"
@@ -24,7 +25,7 @@ const App = () => {
         background: "url(http://pets-images.dev-apis.com/pets/wallpaperA.jpg",
       }}
     >
-      <AdoptedPetContext.Provider value={adoptedPet}>
+      <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <Suspense
             fallback={
@@ -44,7 +45,7 @@ const App = () => {
             </Routes>
           </Suspense>
         </QueryClientProvider>
-      </AdoptedPetContext.Provider>
+      </Provider>
     </div>
   );
 };
